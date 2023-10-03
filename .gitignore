@@ -247,3 +247,5 @@ pyrightconfig.json
 
 airflow/standalone_admin_password.txt
 **/logs/*
+
+*.pid
