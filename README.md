@@ -51,4 +51,19 @@ airflow standalone
 ```
 
 Read the log, an account `admin` and password will be printed out.
-Go to [http://localhost:8080](http://localhost:8080) and use that credential to enter Airflow Webpage. 
+Go to [http://localhost:8080](http://localhost:8080) and use that credential to enter Airflow Webpage.
+
+![](docs/imgs/airflow_cred.png)
+
+# Add connections
+
+Go to **Admin > Connections** to manage connection.
+
+## Snowflake
+![Alt text](docs/imgs/airflow_conn_snowflake.jpeg)
+
+## StreamSets
+![Alt text](docs/imgs/airflow_conn_streamsets.jpeg)
+
+## ADF
+ADF connection is quite difficult. Contact Thuy Nguyen for more details.
