@@ -1,0 +1,14 @@
+services:
+  postgres_demo:
+    image: postgres:15.4-alpine3.18
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-demo-volume:/var/lib/postgresql/data
+
+volumes:
+  postgres-demo-volume:

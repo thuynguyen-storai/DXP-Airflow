@@ -1,0 +1,10 @@
+[project]
+name = "rs_airflow"
+version = "0.0.1"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = {}
