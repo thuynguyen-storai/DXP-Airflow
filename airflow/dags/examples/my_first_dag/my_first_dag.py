@@ -5,7 +5,7 @@ from airflow.decorators import dag, task
 from airflow.providers.http.operators.http import SimpleHttpOperator
 
 
-@dag(schedule=None, start_date=datetime.datetime(2023, 9, 27))
+@dag(schedule=None, start_date=datetime.datetime(2023, 9, 27), tags=['offer', 'example'])
 def my_first_dag():
     send_webhook = SimpleHttpOperator(
         task_id="send_http",

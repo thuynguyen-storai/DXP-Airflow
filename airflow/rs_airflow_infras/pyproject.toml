@@ -1,5 +1,5 @@
 [project]
-name = "rs_airflow"
+name = "rs_airflow_infras"
 version = "0.0.1"
 
 [build-system]

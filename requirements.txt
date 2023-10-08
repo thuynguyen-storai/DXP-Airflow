@@ -4,7 +4,7 @@ apache-airflow-providers-common-sql == 1.7.1
 apache-airflow-providers-snowflake [common.sql] == 5.0.0
 apache-airflow-providers-microsoft-azure == 6.3.0
 
-./airflow/rs_airflow
+./airflow/rs_airflow_infras
 
 
 # Constraints - making sure Airflow is running compatibly as a server

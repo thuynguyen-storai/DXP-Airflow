@@ -1,6 +1,6 @@
 import datetime
 
-from rs_airflow.streamsets import StreamsetsOperator
+from rs_airflow_infras.streamsets import StreamsetsOperator
 
 from airflow.decorators import dag
 
