@@ -3,6 +3,7 @@ import json
 
 from airflow.decorators import dag, task
 from airflow.providers.http.operators.http import SimpleHttpOperator
+from airflow.operators.empty import EmptyOperator
 
 
 @dag(schedule=None, start_date=datetime.datetime(2023, 9, 27), tags=['offer', 'example'])
@@ -16,12 +17,7 @@ def my_first_dag():
         headers={"Content-Type": "application/json"},
         log_response=True,
     )
-
-    @task
-    def send_http():
-        return 1
-
-    send_webhook >> send_http()
+    send_webhook >> EmptyOperator(task_id="do_nothing")
 
 
 my_first_dag()
