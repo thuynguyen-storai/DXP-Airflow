@@ -1,4 +1,5 @@
 import time
+from typing import Tuple
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -20,9 +21,9 @@ class StreamsetsHook(BaseHook):
 
     # name of the parameter which receives the connection id
     conn_name_attr = "streamsets_conn_id"
-    conn_type = "general"
+    conn_type = "streamsets"
 
-    hook_name = "StreamsetsHook"
+    hook_name = "Streamsets"
 
     def __init__(self, streamsets_conn_id: str, polling_seconds=10):
         super().__init__()
@@ -30,9 +31,14 @@ class StreamsetsHook(BaseHook):
         self.streamsets_conn_id = streamsets_conn_id
         self.polling_seconds = polling_seconds
 
+        self._conn: requests.Session | None = None
+
         self.base_url = self.get_base_url()
 
     def get_conn(self) -> requests.Session:
+        if self._conn:
+            return self._conn
+
         session = requests.Session()
 
         session.headers = {"X-Requested-By": "sdc"}
@@ -43,7 +49,19 @@ class StreamsetsHook(BaseHook):
             raise ValueError("decrypted_password is not set")
         session.auth = HTTPBasicAuth(connection.login, decrypted_password)
 
+        self._conn = session
         return session
+
+    def test_connection(self) -> Tuple[bool, str]:
+        try:
+            session = self.get_conn()
+            response = session.get(
+                f"{self.base_url}/rest/v1/system/info/currentUser",
+            )
+            assert response.ok
+            return True, "Connection success"
+        except Exception as e:
+            return False, str(e)
 
     def get_base_url(self) -> str:
         connection = self.get_connection(self.streamsets_conn_id)
@@ -68,9 +86,7 @@ class StreamsetsHook(BaseHook):
 
     def _trigger_start_pipeline(self, pipeline_id: str):
         connection = self.get_conn()
-        response = connection.request(
-            method="POST", url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/start"
-        )
+        response = connection.post(url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/start")
         self._check_response(response)
 
     def _polling_pipeline_run_status(self, pipeline_id: str) -> bool:
@@ -110,16 +126,12 @@ class StreamsetsHook(BaseHook):
             str: pipeline status
         """
         connection = self.get_conn()
-        response = connection.request(
-            method="GET", url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/status"
-        )
+        response = connection.request(method="GET", url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/status")
         self._check_response(response)
 
         try:
             pipeline_status: str = response.json()["status"]
-            self.log.debug(
-                "Received pipeline id: %s - status: %s", pipeline_id, pipeline_status
-            )
+            self.log.debug("Received pipeline id: %s - status: %s", pipeline_id, pipeline_status)
             return pipeline_status
         except requests.JSONDecodeError:
             raise AirflowException("Failed to parsed response error")

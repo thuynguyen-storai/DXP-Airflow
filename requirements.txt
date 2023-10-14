@@ -1,11 +1,21 @@
 apache-airflow == 2.7.1
 
 apache-airflow-providers-common-sql == 1.7.1
+apache-airflow-providers-microsoft-mssql[common.sql] == 3.4.2 
+apache-airflow-providers-postgres [common.sql] == 5.6.0
 apache-airflow-providers-snowflake [common.sql] == 5.0.0
+
 apache-airflow-providers-microsoft-azure == 6.3.0
 
-./airflow/rs_airflow_infras
+apache-airflow-providers-elasticsearch [common.sql] == 5.0.1
+
+dask [dataframe] ==2023.9.0
+orjson == 3.9.5
+
+
+
+-e ./airflow/rs_airflow --config-settings editable_mode=compat
 
 
 # Constraints - making sure Airflow is running compatibly as a server
--c https://raw.githubusercontent.com/apache/airflow/constraints-2.7.1/constraints-3.10.txt
+-c https://raw.githubusercontent.com/apache/airflow/constraints-2.7.1/constraints-3.11.txt

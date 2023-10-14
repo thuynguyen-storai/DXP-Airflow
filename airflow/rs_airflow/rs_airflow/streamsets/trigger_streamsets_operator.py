@@ -9,7 +9,7 @@ from . import StreamsetsHook
 # from typing import TypeVarTuple
 
 
-class StreamsetsOperator(BaseOperator):
+class TriggerStreamsetsOperator(BaseOperator):
     """
     StreamSets Operator - for invoking StreamSet's pipelines, monitoring runs, etc, ...
 
