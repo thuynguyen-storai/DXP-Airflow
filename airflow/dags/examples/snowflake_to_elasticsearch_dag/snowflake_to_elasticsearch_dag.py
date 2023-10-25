@@ -9,7 +9,8 @@ def snowflake_to_elasticsearch_dag():
     # Record count = 659,380
     SqlTableToElasticOperator(
         table_schema="dbo",
-        table_name="Product",
+        # table_name="Product",
+        table_name="OfferStagingRuning",
         id_column="Id",
         sql_conn_id="sqlserver_conn",
         elastic_conn_id="elasticsearch_conn",

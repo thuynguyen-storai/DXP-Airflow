@@ -8,10 +8,8 @@ from venv import logger
 import elasticsearch.helpers
 import pandas
 from elasticsearch.serializer import JSONSerializer
-from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from airflow.exceptions import AirflowFailException
 from airflow.hooks.base import BaseHook
 from airflow.models.baseoperator import BaseOperator
 from airflow.providers.elasticsearch.hooks.elasticsearch import ElasticsearchPythonHook
@@ -44,7 +42,7 @@ class SqlTableToElasticOperator(BaseOperator):
         elastic_conn_id: str,
         elastic_index_name: str,
         batch_size=1000,
-        num_of_process=4,
+        num_of_processes=4,
         *args,
         **kwargs,
     ):
@@ -65,9 +63,10 @@ class SqlTableToElasticOperator(BaseOperator):
         self.elastic_index_name = elastic_index_name
 
         self.batch_size = batch_size
+        self.num_of_processes = num_of_processes
 
     def execute(self, context: Context) -> Any:
-        self.use_pandas()
+        self.use_pandas(self.num_of_processes)
 
     def use_pandas(self, process_num=4):
         snowflake_sql_engine: Engine = self.snowflake_hook.get_sqlalchemy_engine()
