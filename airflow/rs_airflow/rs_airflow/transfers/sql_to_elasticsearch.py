@@ -1,5 +1,6 @@
 import datetime
 import logging
+from concurrent.futures import Executor, ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import Pool
 from time import perf_counter
 from typing import Any
@@ -29,6 +30,7 @@ class SqlTableToElasticOperator(BaseOperator):
         elastic_index_name (str): Name of the destination index
         batch_size (int): How many records to be processed per batch (default is 1000)
         num_of_process (int): As this use a multiprocess.Pool at its core, how many process should be allocated to this (default is 4)
+        use_process_pool_over_thread_pool (bool): Whether to use ThreadPool or ProcessPool. Experimentations show that it is best to keep using ThreadPool (which is the default value: False)
     """
 
     ui_color = "#f0f0e4"
@@ -43,6 +45,7 @@ class SqlTableToElasticOperator(BaseOperator):
         elastic_index_name: str,
         batch_size=1000,
         num_of_processes=4,
+        use_process_pool_over_thread_pool=False,
         *args,
         **kwargs,
     ):
@@ -64,6 +67,7 @@ class SqlTableToElasticOperator(BaseOperator):
 
         self.batch_size = batch_size
         self.num_of_processes = num_of_processes
+        self.use_process_pool_over_thread_pool = use_process_pool_over_thread_pool
 
     def execute(self, context: Context) -> Any:
         self.use_pandas(self.num_of_processes)
@@ -71,8 +75,12 @@ class SqlTableToElasticOperator(BaseOperator):
     def use_pandas(self, process_num=4):
         snowflake_sql_engine: Engine = self.snowflake_hook.get_sqlalchemy_engine()
 
+        pool_type: type[Executor] = (
+            ProcessPoolExecutor if self.use_process_pool_over_thread_pool else ThreadPoolExecutor
+        )
+
         start_time = perf_counter()
-        with snowflake_sql_engine.connect() as snowflake_connection, Pool(process_num) as process_pool:
+        with snowflake_sql_engine.connect() as snowflake_connection, pool_type(process_num) as process_pool:
             batches = pandas.read_sql_table(
                 table_name=self.table_name,
                 schema=self.table_schema,
@@ -81,7 +89,7 @@ class SqlTableToElasticOperator(BaseOperator):
             )
 
             # force list finalized
-            for _ in process_pool.imap_unordered(self._process_sql_batch, batches):
+            for _ in process_pool.map(self._process_sql_batch, batches):
                 pass
 
         finish_time = perf_counter()

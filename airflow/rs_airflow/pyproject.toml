@@ -3,7 +3,7 @@ name = "rs_airflow"
 version = "0.0.1"
 authors = [{ name = "Thuy Nguyen", email = "thuy.n@stor.ai" }]
 description = "A sample Apache Airflow provider package built by Astronomer."
-requires-python = "~=3.11"
+requires-python = "~=3.10"
 
 [build-system]
 requires = ["setuptools"]
