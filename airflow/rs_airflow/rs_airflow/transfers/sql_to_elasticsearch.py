@@ -28,8 +28,9 @@ class SqlTableToElasticOperator(BaseOperator):
         sql_conn_id (str): Connection ID of SQL Table. When using with providers, this could be Snowflake, SQL Server, etc.
         elastic_conn_id (str): Connection ID of Elasticsearch
         elastic_index_name (str): Name of the destination index
-        batch_size (int): How many records to be processed per batch (default is 1000)
-        num_of_process (int): As this use a multiprocess.Pool at its core, how many process should be allocated to this (default is 4)
+
+        chunk_size (int): How many records to be processed per batch (default is 1000).
+        executor_num (int): How many executor (Thread or Process) to be useed (default is 4).
         use_process_pool_over_thread_pool (bool): Whether to use ThreadPool or ProcessPool. Experimentations show that it is best to keep using ThreadPool (which is the default value: False)
     """
 
@@ -43,8 +44,8 @@ class SqlTableToElasticOperator(BaseOperator):
         sql_conn_id: str,
         elastic_conn_id: str,
         elastic_index_name: str,
-        batch_size=1000,
-        num_of_processes=4,
+        chunk_size=1000,
+        executor_num=4,
         use_process_pool_over_thread_pool=False,
         *args,
         **kwargs,
@@ -65,12 +66,12 @@ class SqlTableToElasticOperator(BaseOperator):
 
         self.elastic_index_name = elastic_index_name
 
-        self.batch_size = batch_size
-        self.num_of_processes = num_of_processes
+        self.chunk_size = chunk_size
+        self.executor_num = executor_num
         self.use_process_pool_over_thread_pool = use_process_pool_over_thread_pool
 
     def execute(self, context: Context) -> Any:
-        self.use_pandas(self.num_of_processes)
+        self.use_pandas(self.executor_num)
 
     def use_pandas(self, process_num=4):
         snowflake_sql_engine: Engine = self.snowflake_hook.get_sqlalchemy_engine()
@@ -85,7 +86,7 @@ class SqlTableToElasticOperator(BaseOperator):
                 table_name=self.table_name,
                 schema=self.table_schema,
                 con=snowflake_connection,
-                chunksize=self.batch_size,
+                chunksize=self.chunk_size,
             )
 
             # force list finalized
@@ -93,7 +94,7 @@ class SqlTableToElasticOperator(BaseOperator):
                 pass
 
         finish_time = perf_counter()
-        logger.info("execution time: %d", finish_time - start_time)
+        logger.debug("execution time: %d", finish_time - start_time)
 
     def _process_sql_batch(self, batch: pandas.DataFrame):
         elastic_client = self.elastic_hook.get_conn
