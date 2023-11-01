@@ -10,6 +10,10 @@ apache-airflow-providers-microsoft-azure == 6.3.0
 
 apache-airflow-providers-elasticsearch[common.sql] == 5.0.1
 
+numba == 0.58.1
+pandas==2.1.0
+
+
 filprofiler == 2023.3.1
 
 -e ./airflow/rs_airflow
