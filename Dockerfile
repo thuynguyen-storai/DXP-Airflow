@@ -1,8 +1,23 @@
-FROM apache/airflow:2.7.1-python3.10
+FROM apache/airflow:slim-2.7.3-python3.10
+
 USER root
+
+RUN apt update \
+    && apt install -y --no-install-recommends openjdk-11-jre-headless procps \
+    && apt-get autoremove -yqq --purge \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+
+USER airflow
 WORKDIR /airflow
-COPY requirements.txt .
-COPY airflow/rs_airflow_infras ./rs_airflow_infras
+
+# Install RS-Airflow
+COPY --chown=airflow rs_airflow ./rs_airflow
+COPY --chown=airflow requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY airflow/dags ./dags
+
+COPY --chown=airflow airflow/dags ./dags
+COPY --chown=airflow airflow/airflow.cfg ./

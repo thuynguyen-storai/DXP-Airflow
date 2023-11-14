@@ -6,18 +6,18 @@ from rs_airflow.transfers.sql_to_sql import SqlQueryToSql
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 
-@dag("azure_blob_to_sql_server_dag", start_date=datetime(2023, 10, 28), schedule=None)
+@dag("snowflake_to_sql_server_dag", start_date=datetime(2023, 11, 2), schedule=None)
 def snowflake_to_sql_server_dag():
     truncate_sql = SQLExecuteQueryOperator(
         task_id="truncate_sql_table",
-        sql="IF OBJECT_ID('test_airflow_product', 'U') IS NOT NULL DROP TABLE test_airflow_product",
+        sql="IF OBJECT_ID('test_airflow_product', 'U') IS NOT NULL TRUNCATE TABLE test_airflow_product;",
         conn_id="sql_staging_conn",
-        autocommit=True,
+        split_statements=False,
     )
 
     product_snowflake_to_sql = SqlQueryToSql(
         task_id="SqlQueryToSql",
-        query="select * from public.product where SECONDARYPRODUCTIDENTIFIER",
+        query="select * from rs_schema.product",
         source_sql_conn_id="snowflake_conn",
         dest_sql_conn_id="sql_staging_conn",
         dest_table_schema="dbo",
@@ -25,6 +25,8 @@ def snowflake_to_sql_server_dag():
     )
 
     truncate_sql >> product_snowflake_to_sql
+
+    # @task.kubernetes(image="python:3.8-slim-buster")
 
 
 snowflake_to_sql_server_dag()

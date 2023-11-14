@@ -10,5 +10,7 @@
       "username": "postgres"
     }
   ],
-  "python.analysis.extraPaths": ["/home/ducth/DXP-Airflow/airflow/rs_airflow"]
+  "python.analysis.extraPaths": [
+    "/home/ducth/DXP-Airflow/rs_airflow"
+  ]
 }

@@ -1,23 +1,31 @@
-apache-airflow == 2.7.1
+# To make sure Airflow work correctly, we should strictly force library to stay at the same version
 
-apache-airflow-providers-common-sql == 1.7.1
-apache-airflow-providers-microsoft-mssql[common.sql] == 3.4.2 
-apache-airflow-providers-postgres[common.sql] == 5.6.0
-apache-airflow-providers-snowflake[common.sql] == 5.0.0
-apache-airflow-providers-sqlite[common.sql] == 3.4.3
+# Base Airflow
+apache-airflow == 2.7.3
 
-apache-airflow-providers-microsoft-azure == 6.3.0
+# SQL libraries
+apache-airflow-providers-common-sql
+apache-airflow-providers-microsoft-mssql[common.sql]
+apache-airflow-providers-postgres[common.sql]
+apache-airflow-providers-snowflake[common.sql]
+apache-airflow-providers-sqlite[common.sql]
 
-apache-airflow-providers-elasticsearch[common.sql] == 5.0.1
+# Azure related library
+apache-airflow-providers-microsoft-azure
 
-numba == 0.58.1
-pandas==2.1.0
+# Elasticsearch
+apache-airflow-providers-elasticsearch[common.sql]
 
+# Kubernetes
+apache-airflow-providers-cncf-kubernetes
 
-filprofiler == 2023.3.1
+# Big Data libraries
+pyspark
+pandas
 
--e ./airflow/rs_airflow
+# Install customized libraries
+-e ./rs_airflow
 
 
 # Constraints - making sure Airflow is running compatibly as a server
--c https://raw.githubusercontent.com/apache/airflow/constraints-2.7.1/constraints-3.10.txt
+-c https://raw.githubusercontent.com/apache/airflow/constraints-2.7.3/constraints-3.10.txt
