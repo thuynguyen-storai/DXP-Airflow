@@ -1,9 +1,7 @@
 [project]
 name = "dxp_airflow"
 version = "1.0.0"
-authors = [
-    {name = "Thuy Nguyen", email = "thuy.n@stor.ai"},
-]
+authors = [{ name = "Thuy Nguyen", email = "thuy.n@stor.ai" }]
 description = "DXP-Airflow"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -19,5 +17,5 @@ classifiers = [
 [tool.black]
 line-length = 120
 
-[tool.flake8]
-max_line_length = 120
+[tool.pytest.ini_options]
+testpaths = ["rs_airflow", "airflow"]

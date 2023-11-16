@@ -1,1 +1,10 @@
+[flake8]
 max_line_length = 120
+exclude =
+  .git,
+  .github,
+  .vscode,
+  .docs,
+  __pycache__,
+  .venv,
+  .pytest_cache
