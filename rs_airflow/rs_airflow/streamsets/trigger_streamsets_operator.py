@@ -3,7 +3,7 @@ from typing import Any
 from airflow.models.baseoperator import BaseOperator
 from airflow.utils.context import Context
 
-from . import StreamsetsHook
+from .streamsets_hook import StreamsetsHook
 
 # Python 3.11 types
 # from typing import TypeVarTuple
