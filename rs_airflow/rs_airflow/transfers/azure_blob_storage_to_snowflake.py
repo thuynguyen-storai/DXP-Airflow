@@ -29,12 +29,13 @@ class AzureBlobToSnowflake(BaseOperator):
         input_file_format (str): Supporting file formats include CSV, JSON, Avro, ...
             See more: [Snowflake - Create Stage - Optional Parameters]\
             (https://docs.snowflake.com/en/sql-reference/sql/create-stage#optional-parameters)
-        input_file_config (dict[str, str]): If exists, each key-value will be added to Snowflake Stage config.
+        input_file_config (dict[str, v]): If exists, each key-value will be added to Snowflake Stage config.
             See more: [Snowflake - Create Stage - Format Type Options]\
             (https://docs.snowflake.com/en/sql-reference/sql/create-stage#format-type-options-formattypeoptions)
-        copy_into_config (dict[str, str]): Config to put into `COPY INTO` statement.
+        copy_into_config (dict[str, Any]): Config to put into `COPY INTO` statement.
 
     Examples:
+
         ```python
         AzureBlobToSnowflake(
             task_id="blob_to_snowflake",
@@ -60,8 +61,8 @@ class AzureBlobToSnowflake(BaseOperator):
         dest_table: str,
         dest_prerun_query: str,
         input_file_format: str = "csv",
-        input_file_config: dict[str, str] | None = None,
-        copy_into_config: dict[str, str] | None = None,
+        input_file_config: dict[str, Any] | None = None,
+        copy_into_config: dict[str, Any] | None = None,
         *args,
         **kwargs,
     ):
@@ -94,28 +95,25 @@ class AzureBlobToSnowflake(BaseOperator):
 
     def _generate_blob_sas(self) -> tuple[str, str]:
         input_blob_hook = WasbHook(self.source_blob_conn_id)
-
-        internal_blob_client = input_blob_hook.blob_service_client.get_blob_client(
-            self.source_blob_container, self.source_blob_name
+        container_client = input_blob_hook.blob_service_client.get_container_client(
+            container=self.source_blob_container
         )
-        if not internal_blob_client.exists:
-            raise AirflowFailException(
-                f"Blob not exists: {self.source_blob_container}\\{self.source_blob_name}"
-            )
 
-        blob_url = urlparse(internal_blob_client.url)
+        blob_url = urlparse(container_client.url)
         azure_url = f"azure://{blob_url.netloc}{blob_url.path}"
 
         start_time = datetime.datetime.now(datetime.timezone.utc)
-        expiry_time = start_time + datetime.timedelta(minutes=30)
+        expiry_time = start_time + datetime.timedelta(
+            days=1  # Compensate for UTC mismatch
+        )
+
         sas_token = generate_container_sas(
-            account_name=str(internal_blob_client.account_name),
+            account_name=str(container_client.account_name),
             container_name=self.source_blob_container,
             account_key=input_blob_hook.blob_service_client.credential.account_key,
             permission=ContainerSasPermissions(read=True, list=True),
             expiry=expiry_time,
             start=start_time,
-            protocol="https",
         )
 
         return azure_url, sas_token
@@ -172,14 +170,17 @@ class AzureBlobToSnowflake(BaseOperator):
         )
 
         snowflake_conn.execute(
-            f"COPY INTO {table_full_name} FROM @{stage_name} {sql_copy_into_config}"
+            text(
+                f"COPY INTO {table_full_name} FROM @{stage_name} {sql_copy_into_config} PATTERN=:file_pattern;"
+            ),
+            {"file_pattern": self.source_blob_name},
         )
 
     @staticmethod
     def _parse_configs_for_sql_statement(config: dict[str, str] | None = None) -> str:
         sql_config = ""
         if config:
-            file_config_pair = [f"{key}='{value}'" for key, value in config.items()]
+            file_config_pair = [f"{key}={repr(value)}" for key, value in config.items()]
             sql_config = " ".join(file_config_pair)
 
         return sql_config
