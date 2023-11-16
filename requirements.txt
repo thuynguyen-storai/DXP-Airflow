@@ -23,6 +23,8 @@ apache-airflow-providers-cncf-kubernetes
 pyspark
 pandas
 
+oscrypto @ git+https://github.com/wbond/oscrypto.git@d5f3437ed24257895ae1edd9e503cfb352e635a8
+
 # Install customized libraries
 -e ./rs_airflow
 
