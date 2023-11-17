@@ -59,7 +59,7 @@ class AzureBlobToSnowflake(BaseOperator):
         dest_snowflake_conn_id: str,
         dest_schema: str,
         dest_table: str,
-        dest_prerun_query: str,
+        dest_prerun_query: str | None = None,
         input_file_format: str = "csv",
         input_file_config: dict[str, Any] | None = None,
         copy_into_config: dict[str, Any] | None = None,
