@@ -1,7 +1,7 @@
 # To make sure Airflow work correctly, we should strictly force library to stay at the same version
 
 # Base Airflow
-apache-airflow == 2.7.3
+apache-airflow[async] == 2.7.3
 
 # SQL libraries
 apache-airflow-providers-common-sql
@@ -23,7 +23,7 @@ apache-airflow-providers-cncf-kubernetes
 pyspark
 pandas
 
-oscrypto @ git+https://github.com/wbond/oscrypto.git@d5f3437ed24257895ae1edd9e503cfb352e635a8
+oscrypto @ git+https://github.com/wbond/oscrypto.git@1547f535001ba568b239b8797465536759c742a3
 
 # Install customized libraries
 -e ./rs_airflow
