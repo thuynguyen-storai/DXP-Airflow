@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from airflow.decorators import dag
-from rs_airflow.spark.transfers.sql_to_elastic import SparkSqlToElasticsearch
+from rs_airflow.spark.transfers import SparkSqlToElasticsearch
 
 
 @dag(dag_id="sql_to_elastic_with_spark_dag", start_date=datetime(2023, 11, 9), schedule=None)
