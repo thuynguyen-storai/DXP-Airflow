@@ -1,7 +1,7 @@
 import datetime
 
 from airflow.decorators import dag
-from rs_airflow.streamsets import TriggerStreamsetsOperator
+from rs_airflow.streamsets.operators import TriggerStreamsetsOperator
 
 __version__ = "0.0.1"
 

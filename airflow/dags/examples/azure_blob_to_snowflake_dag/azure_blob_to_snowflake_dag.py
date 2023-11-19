@@ -11,12 +11,12 @@ def azure_blob_to_snowflake_dag():
         task_id="blob_to_snowflake",
         source_blob_conn_id="sandbox_united_blob_conn",
         source_blob_container="dev-etl",
-        source_blob_name="CampaignDIM_20230914100009.txt",
+        source_blob_name="CampaignDIM_.*[.]txt",
         dest_snowflake_conn_id="snowflake_conn",
         dest_schema="public",
         dest_table="test_airflow_copy_into",
         dest_prerun_query="TRUNCATE TABLE test_airflow_copy_into",
-        input_file_config={"FIELD_DELIMITER": "|"},
+        input_file_config={"FIELD_DELIMITER": "|", "SKIP_HEADER": 1},
     )
 
 

@@ -22,6 +22,6 @@ helm repo add apache-airflow https://airflow.apache.org
 ```
 
 ```shell
-helm upgrade --install airflow apache-airflow/airflow --values ./k8s/SandboxR1.values.yaml --namespace airflow --debug
+helm upgrade --install airflow apache-airflow/airflow --values ./k8s/SandboxUnited.values.yaml --debug --timeout=10m
 ```
 

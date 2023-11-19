@@ -1,5 +1,5 @@
 import time
-from typing import Tuple
+from typing import Any, Tuple
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -25,6 +25,17 @@ class StreamsetsHook(BaseHook):
 
     hook_name = "Streamsets"
 
+    @staticmethod
+    def get_ui_field_behaviour() -> dict[str, Any]:
+        """Returns custom field behaviour."""
+        return {
+            "hidden_fields": ["port", "schema"],
+            "relabeling": {},
+            "placeholders": {
+                "host": "Full StreamSets URL (e.g, http://192.168.20.208:18630)"
+            },
+        }
+
     def __init__(self, streamsets_conn_id: str, polling_seconds=10):
         super().__init__()
 
@@ -33,7 +44,7 @@ class StreamsetsHook(BaseHook):
 
         self._conn: requests.Session | None = None
 
-        self.base_url = self.get_base_url()
+        self.base_url = self.get_connection(self.streamsets_conn_id).host
 
     def get_conn(self) -> requests.Session:
         if self._conn:
@@ -63,10 +74,6 @@ class StreamsetsHook(BaseHook):
         except Exception as e:
             return False, str(e)
 
-    def get_base_url(self) -> str:
-        connection = self.get_connection(self.streamsets_conn_id)
-        return connection.host
-
     def start_pipeline(self, pipeline_id: str):
         self._verify_pipeline_initial_state(pipeline_id)
         self._trigger_start_pipeline(pipeline_id)
@@ -86,7 +93,9 @@ class StreamsetsHook(BaseHook):
 
     def _trigger_start_pipeline(self, pipeline_id: str):
         connection = self.get_conn()
-        response = connection.post(url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/start")
+        response = connection.post(
+            url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/start"
+        )
         self._check_response(response)
 
     def _polling_pipeline_run_status(self, pipeline_id: str) -> bool:
@@ -126,12 +135,16 @@ class StreamsetsHook(BaseHook):
             str: pipeline status
         """
         connection = self.get_conn()
-        response = connection.request(method="GET", url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/status")
+        response = connection.request(
+            method="GET", url=f"{self.base_url}/rest/v1/pipeline/{pipeline_id}/status"
+        )
         self._check_response(response)
 
         try:
             pipeline_status: str = response.json()["status"]
-            self.log.debug("Received pipeline id: %s - status: %s", pipeline_id, pipeline_status)
+            self.log.debug(
+                "Received pipeline id: %s - status: %s", pipeline_id, pipeline_status
+            )
             return pipeline_status
         except requests.JSONDecodeError:
             raise AirflowException("Failed to parsed response error")
