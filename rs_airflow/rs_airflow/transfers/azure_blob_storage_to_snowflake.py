@@ -104,8 +104,8 @@ class AzureBlobToSnowflake(BaseOperator):
 
         start_time = datetime.datetime.now(datetime.timezone.utc)
         expiry_time = start_time + datetime.timedelta(
-            days=1  # Compensate for UTC mismatch
-        )
+            days=1
+        )  # Compensate for UTC mismatch
 
         sas_token = generate_container_sas(
             account_name=str(container_client.account_name),
