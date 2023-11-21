@@ -2,7 +2,7 @@ from datetime import datetime
 
 from airflow.decorators import dag
 
-from rs_airflow.transfers.sql_to_sql import SqlQueryToSql
+from rs_airflow.transfers.deprecated import SqlQueryToSql
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 

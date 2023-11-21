@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from rs_airflow.transfers.sql_to_elasticsearch import SqlTableToElasticOperator
+from rs_airflow.transfers.deprecated import SqlTableToElasticOperator
 from airflow.decorators import dag
 
 
