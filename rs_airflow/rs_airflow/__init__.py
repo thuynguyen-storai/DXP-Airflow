@@ -14,21 +14,11 @@ def get_provider_info():
                 "integration-name": "StreamSets",
                 "python-modules": ["rs_airflow.streamsets.hooks.StreamsetsHook"],
             },
-            {
-                "integration-name": "RS ElasticsearchHook",
-                "python-modules": [
-                    "rs_airflow.elasticsearch.hooks.RsElasticsearchHook"
-                ],
-            },
         ],
         "connection-types": [
             {
                 "hook-class-name": "rs_airflow.streamsets.hooks.StreamsetsHook",
                 "connection-type": "streamsets",
-            },
-            {
-                "hook-class-name": "rs_airflow.elasticsearch.hooks.RsElasticsearchHook",
-                "connection-type": "rs_elasticsearch",
             },
         ],
         "versions": [__version__],
