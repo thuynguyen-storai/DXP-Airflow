@@ -8,7 +8,9 @@ class JdbcConfigManager:
     """
 
     @classmethod
-    def generate_jdbc_configs_for_sqlalchemy(cls, connection: Connection) -> dict[str, str]:
+    def generate_jdbc_configs_for_sqlalchemy(
+        cls, connection: Connection
+    ) -> dict[str, str]:
         connection_generator_map = {
             "snowflake": JdbcConfigManager._generate_snowflake_config,
             "mssql": JdbcConfigManager._generate_mssql_config,
@@ -17,7 +19,9 @@ class JdbcConfigManager:
         generate_func = connection_generator_map.get(connection.conn_type, None)
 
         if not generate_func:
-            raise AirflowFailException("Unknown connection type: %s", connection.conn_type)
+            raise AirflowFailException(
+                "Unknown connection type: %s", connection.conn_type
+            )
 
         return generate_func(connection)
 

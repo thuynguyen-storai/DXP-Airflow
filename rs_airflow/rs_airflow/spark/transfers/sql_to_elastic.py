@@ -35,14 +35,18 @@ class SparkSqlToElasticsearch(BaseOperator):
         spark = SparkBuilder.generate_spark_session()
 
         source_connection = BaseHook.get_connection(conn_id=self.source_conn_id)
-        source_jdbc_configs = JdbcConfigManager.generate_jdbc_configs_for_sqlalchemy(source_connection)
+        source_jdbc_configs = JdbcConfigManager.generate_jdbc_configs_for_sqlalchemy(
+            source_connection
+        )
 
         spark_executor_cores = max(multiprocessing.cpu_count() - 2, 1)
 
         input_df = (
             spark.read.format("jdbc")
             .options(**source_jdbc_configs)
-            .option("numPartitions", str(spark_executor_cores))  # No effect, testing purpose only
+            .option(
+                "numPartitions", str(spark_executor_cores)
+            )  # No effect, testing purpose only
             .option("query", self.source_query)
             .load()
         )

@@ -31,14 +31,27 @@ class SparkSqlToSql(BaseOperator):
         self._logger.info("Executing operator SparkSqlToSql")
 
         source_connection = BaseHook.get_connection(self.source_conn_id)
-        source_jdbc_configs = JdbcConfigManager.generate_jdbc_configs_for_sqlalchemy(source_connection)
+        source_jdbc_configs = JdbcConfigManager.generate_jdbc_configs_for_sqlalchemy(
+            source_connection
+        )
 
         spark = SparkBuilder.generate_spark_session()
-        df = spark.read.format("jdbc").options(**source_jdbc_configs).option("query", self.source_query).load()
+        df = (
+            spark.read.format("jdbc")
+            .options(**source_jdbc_configs)
+            .option("query", self.source_query)
+            .load()
+        )
 
         dest_connection = BaseHook.get_connection(self.dest_conn_id)
-        dest_jdbc_configs = JdbcConfigManager.generate_jdbc_configs_for_sqlalchemy(dest_connection)
-        df_writer = df.write.format("jdbc").options(**dest_jdbc_configs).option("dbtable", self.dest_table_name)
+        dest_jdbc_configs = JdbcConfigManager.generate_jdbc_configs_for_sqlalchemy(
+            dest_connection
+        )
+        df_writer = (
+            df.write.format("jdbc")
+            .options(**dest_jdbc_configs)
+            .option("dbtable", self.dest_table_name)
+        )
         df_writer.save(mode="overwrite")
 
         self._logger.info("Finished operator SparkSqlToSql")

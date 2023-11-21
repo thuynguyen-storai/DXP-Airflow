@@ -24,7 +24,9 @@ class SparkBuilder:
         spark_executor_cores = max(multiprocessing.cpu_count() - 2, 1)
         spark_conf.set("spark.default.parallelism", str(spark_executor_cores))
 
-        machine_total_memory_MiB = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024.0**2)
+        machine_total_memory_MiB = (
+            os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024.0**2)
+        )
         driver_provided_memory_MiB = max(machine_total_memory_MiB - 512, 512)
         spark_conf.set("spark.driver.memory", f"{driver_provided_memory_MiB:.0f}m")
 
