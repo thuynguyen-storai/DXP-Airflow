@@ -1,8 +1,8 @@
 import datetime
 
 from airflow.decorators import dag, task
-from airflow.operators.empty import EmptyOperator
 from airflow.operators.bash import BashOperator
+from airflow.operators.empty import EmptyOperator
 
 
 @dag(schedule=None, start_date=datetime.datetime(2023, 9, 27), tags=["offer", "example"])

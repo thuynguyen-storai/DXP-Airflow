@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from rs_airflow.transfers.deprecated import SqlTableToElasticOperator
 from airflow.decorators import dag
+from rs_airflow.transfers.deprecated import SqlTableToElasticOperator
 
 
 @dag("snowflake_to_elasticsearch_dag", start_date=datetime(2023, 10, 3), schedule=None)

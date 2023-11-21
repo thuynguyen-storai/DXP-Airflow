@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from rs_airflow.transfers.azure_blob_storage_to_sql_server import AzureBlobStorageToSqlServerOperator
-
 from airflow.decorators import dag
+from rs_airflow.transfers.azure_blob_storage_to_sql_server import AzureBlobStorageToSqlServerOperator
 
 
 @dag("azure_blob_to_sql_server_dag", start_date=datetime(2023, 10, 28), schedule=None)

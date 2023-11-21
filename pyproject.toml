@@ -17,6 +17,9 @@ classifiers = [
 [tool.black]
 line-length = 120
 
+[tool.isort]
+line_length = 120
+
 [tool.pytest.ini_options]
 testpaths = ["rs_airflow", "airflow"]
 

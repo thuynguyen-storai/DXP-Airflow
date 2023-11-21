@@ -1,9 +1,8 @@
 from datetime import datetime
 
 from airflow.decorators import dag
-
-from rs_airflow.transfers.deprecated import SqlQueryToSql
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from rs_airflow.transfers.deprecated import SqlQueryToSql
 
 
 @dag("snowflake_to_sql_server_dag", start_date=datetime(2023, 11, 2), schedule=None)

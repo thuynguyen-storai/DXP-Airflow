@@ -1,6 +1,6 @@
 from datetime import datetime
-from airflow.decorators import dag
 
+from airflow.decorators import dag
 from rs_airflow.spark.transfers.sql_to_sql import SparkSqlToSql
 
 
