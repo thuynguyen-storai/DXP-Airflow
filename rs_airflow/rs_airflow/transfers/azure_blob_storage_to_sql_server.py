@@ -1,13 +1,12 @@
 import datetime
 from typing import Any
 
+from azure.storage.blob import BlobSasPermissions, generate_blob_sas
+
 from airflow.hooks.base import BaseHook
 from airflow.models.baseoperator import BaseOperator
-from airflow.utils.context import Context
-
 from airflow.providers.microsoft.azure.hooks.wasb import WasbHook
-
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions
+from airflow.utils.context import Context
 
 
 class AzureBlobStorageToSqlServerOperator(BaseOperator):
@@ -46,12 +45,16 @@ class AzureBlobStorageToSqlServerOperator(BaseOperator):
     ):
         super().__init__(*args, **kwargs)
 
-        self.az_blob_hook: WasbHook = BaseHook.get_connection(conn_id=az_blob_conn_id).get_hook()
+        self.az_blob_hook: WasbHook = BaseHook.get_connection(
+            conn_id=az_blob_conn_id
+        ).get_hook()
 
     def execute(self, context: Context) -> Any:
         blob_service_client = self.az_blob_hook.get_conn()
 
-        blob_client = blob_service_client.get_blob_client("dev-etl", "CampaignDIM_full_20221210.txt")
+        blob_client = blob_service_client.get_blob_client(
+            "dev-etl", "CampaignDIM_full_20221210.txt"
+        )
 
         blob_sas_token = generate_blob_sas(
             str(blob_client.account_name),
