@@ -65,7 +65,9 @@ class SqlTableToElasticOperator(BaseOperator):
         self.snowflake_hook = snowflake_connection.get_hook()
 
         elastic_urls = self._get_elastic_urls(elastic_conn_id)
-        self.elastic_hook = ElasticsearchPythonHook(elastic_urls, {"serializer": CustomSerializer()})
+        self.elastic_hook = ElasticsearchPythonHook(
+            elastic_urls, {"serializer": CustomSerializer()}
+        )
 
         self.elastic_index_name = elastic_index_name
 
@@ -80,11 +82,15 @@ class SqlTableToElasticOperator(BaseOperator):
         snowflake_sql_engine: Engine = self.snowflake_hook.get_sqlalchemy_engine()
 
         pool_type: type[Executor] = (
-            ProcessPoolExecutor if self.use_process_pool_over_thread_pool else ThreadPoolExecutor
+            ProcessPoolExecutor
+            if self.use_process_pool_over_thread_pool
+            else ThreadPoolExecutor
         )
 
         start_time = perf_counter()
-        with snowflake_sql_engine.connect() as snowflake_connection, pool_type(process_num) as process_pool:
+        with snowflake_sql_engine.connect() as snowflake_connection, pool_type(
+            process_num
+        ) as process_pool:
             batches = pandas.read_sql_table(
                 table_name=self.table_name,
                 schema=self.table_schema,

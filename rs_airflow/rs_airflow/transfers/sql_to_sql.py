@@ -76,7 +76,9 @@ class SqlQueryToSql(BaseOperator):
 
         logger = logging.getLogger(__name__)
 
-        processing_batches = pandas.read_sql_query(self.query, con=source_sql_engine, chunksize=self.chunk_size)
+        processing_batches = pandas.read_sql_query(
+            self.query, con=source_sql_engine, chunksize=self.chunk_size
+        )
         for batch in processing_batches:
             batch.to_sql(
                 self.dest_table_name,
@@ -114,7 +116,9 @@ class SqlQueryToSql(BaseOperator):
         source_sql_engine = self._get_sql_engine_from_conn(self.source_sql_conn_id)
         dest_sql_engine = self._get_sql_engine_from_conn(self.dest_sql_conn_id)
 
-        processing_batches = pandas.read_sql_query(self.query, con=source_sql_engine, chunksize=self.chunk_size)
+        processing_batches = pandas.read_sql_query(
+            self.query, con=source_sql_engine, chunksize=self.chunk_size
+        )
 
         for batch in processing_batches:
             batch.to_sql(
@@ -136,4 +140,8 @@ class SqlQueryToSql(BaseOperator):
             raise AirflowFailException(e)
 
     def _get_execution_pool_type(self):
-        return ProcessPoolExecutor if self.use_process_pool_over_thread_pool else ThreadPoolExecutor
+        return (
+            ProcessPoolExecutor
+            if self.use_process_pool_over_thread_pool
+            else ThreadPoolExecutor
+        )
