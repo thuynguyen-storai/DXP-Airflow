@@ -19,3 +19,6 @@ line-length = 120
 
 [tool.pytest.ini_options]
 testpaths = ["rs_airflow", "airflow"]
+
+[tool.sqlfluff.core]
+max_line_length = 120

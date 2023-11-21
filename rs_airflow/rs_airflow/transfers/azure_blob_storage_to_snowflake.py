@@ -29,7 +29,7 @@ class AzureBlobToSnowflake(BaseOperator):
         input_file_format (str): Supporting file formats include CSV, JSON, Avro, ...
             See more: [Snowflake - Create Stage - Optional Parameters]\
             (https://docs.snowflake.com/en/sql-reference/sql/create-stage#optional-parameters)
-        input_file_config (dict[str, v]): If exists, each key-value will be added to Snowflake Stage config.
+        input_file_config (dict[str, Any]): If exists, each key-value will be added to Snowflake Stage config.
             See more: [Snowflake - Create Stage - Format Type Options]\
             (https://docs.snowflake.com/en/sql-reference/sql/create-stage#format-type-options-formattypeoptions)
         copy_into_config (dict[str, Any]): Config to put into `COPY INTO` statement.
@@ -90,6 +90,7 @@ class AzureBlobToSnowflake(BaseOperator):
 
         snowflake_engine = self._get_snowflake_engine()
         with snowflake_engine.engine.begin() as snowflake_conn:
+            self._perform_prerun_query(snowflake_conn)
             self._create_snowflake_stage(snowflake_conn, stage_name, blob_url, blob_sas)
             self._perform_copy_into(snowflake_conn, stage_name)
 
@@ -126,11 +127,15 @@ class AzureBlobToSnowflake(BaseOperator):
         sas_token: str,
     ):
         sql_file_config = self._parse_configs_for_sql_statement(self.input_file_config)
+        sql_copy_into_config = self._parse_configs_for_sql_statement(
+            self.copy_into_config
+        )
         create_stage_query = text(
             f"CREATE TEMPORARY STAGE {stage_name} \
                 URL=:blob_url \
                 CREDENTIALS=( AZURE_SAS_TOKEN=:sas_token ) \
-                FILE_FORMAT=( TYPE=:file_type {sql_file_config})",
+                FILE_FORMAT=( TYPE=:file_type {sql_file_config} ) \
+                COPY_OPTIONS=( {sql_copy_into_config} )",
         )
 
         snowflake_conn.execute(
@@ -144,7 +149,7 @@ class AzureBlobToSnowflake(BaseOperator):
 
     def _perform_prerun_query(self, snowflake_conn: Connection):
         if self.dest_prerun_query:
-            snowflake_conn.execute(self._perform_prerun_query)
+            snowflake_conn.execute(self.dest_prerun_query)
 
     def _perform_copy_into(self, snowflake_conn: Connection, stage_name: str):
         """
@@ -165,13 +170,9 @@ class AzureBlobToSnowflake(BaseOperator):
         """
         table_full_name = f"{self.dest_schema}.{self.dest_table}"
 
-        sql_copy_into_config = self._parse_configs_for_sql_statement(
-            self.copy_into_config
-        )
-
         snowflake_conn.execute(
             text(
-                f"COPY INTO {table_full_name} FROM @{stage_name} {sql_copy_into_config} PATTERN=:file_pattern;"
+                f"COPY INTO {table_full_name} FROM @{stage_name} PATTERN = :file_pattern;"
             ),
             {"file_pattern": self.source_blob_name},
         )
