@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import kubernetes.client as k8s
+
 from airflow.decorators import dag
 from rs_airflow.spark.transfers import SparkSqlToElasticsearch
 
@@ -13,6 +15,20 @@ def sql_server_to_es_with_spark_dag():
         id_column="Id",
         dest_es_conn_id="elasticsearch_conn",
         dest_index_name="test_airflows",
+        executor_config={
+            "pod_override": k8s.V1Pod(
+                spec=k8s.V1PodSpec(
+                    containers=[
+                        k8s.V1Container(
+                            name="base",
+                            resources=k8s.V1ResourceRequirements(
+                                requests={"cpu": "2000m", "memory": "2048Mi"}, limits={"memory": "2048Mi"}
+                            ),
+                        )
+                    ]
+                )
+            )
+        },
     )
 
 
