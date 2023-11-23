@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Any
 from urllib.parse import urlparse
 
@@ -51,6 +52,8 @@ class AzureBlobToSnowflake(BaseOperator):
         ```
     """
 
+    ui_fgcolor: str = "#d6e6ff"
+
     def __init__(
         self,
         source_blob_conn_id: str,
@@ -82,6 +85,8 @@ class AzureBlobToSnowflake(BaseOperator):
         self.dest_schema = dest_schema
         self.dest_table = dest_table
         self.dest_prerun_query = dest_prerun_query
+
+        self._logger = logging.getLogger(__name__)
 
     def execute(self, context: Context) -> Any:
         blob_url, blob_sas = self._generate_blob_sas()
@@ -170,12 +175,27 @@ class AzureBlobToSnowflake(BaseOperator):
         """
         table_full_name = f"{self.dest_schema}.{self.dest_table}"
 
-        snowflake_conn.execute(
+        copy_result = snowflake_conn.execute(
             text(
                 f"COPY INTO {table_full_name} FROM @{stage_name} PATTERN = :file_pattern;"
             ),
             {"file_pattern": self.source_blob_name},
         )
+
+        if copy_result:
+            copy_result_rows = copy_result.all()
+
+            load_failed = any(
+                map(
+                    lambda row: row._asdict()["status"] == "LOAD_FAILED",
+                    copy_result_rows,
+                )
+            )
+
+            if load_failed:
+                raise AirflowFailException("Loaded failed: %s", copy_result_rows)
+
+            self._logger.info("COPY INTO result: %s", copy_result_rows)
 
     @staticmethod
     def _parse_configs_for_sql_statement(config: dict[str, str] | None = None) -> str:
