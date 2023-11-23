@@ -25,3 +25,4 @@ testpaths = ["rs_airflow", "airflow"]
 
 [tool.sqlfluff.core]
 max_line_length = 120
+capitalisation_policy = "lower"
