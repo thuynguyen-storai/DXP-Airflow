@@ -11,6 +11,9 @@
     }
   ],
   "python.analysis.extraPaths": [
-    "/home/ducth/DXP-Airflow/rs_airflow"
-  ]
+    "./rs_airflow"
+  ],
+  "isort.importStrategy": "fromEnvironment",
+  "flake8.importStrategy": "fromEnvironment",
+  "black-formatter.importStrategy": "fromEnvironment"
 }
