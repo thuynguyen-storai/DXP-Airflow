@@ -1,3 +1,5 @@
+from datetime import timedelta
+import time
 from typing import Any
 
 from airflow.models.baseoperator import BaseOperator
@@ -19,7 +21,14 @@ class TriggerStreamsetsOperator(BaseOperator):
 
     """
 
-    def __init__(self, streamsets_conn_id: str, pipeline_id: str, *args, **kwargs):
+    def __init__(
+        self,
+        streamsets_conn_id: str,
+        pipeline_id: str,
+        polling_period=timedelta(seconds=10),
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         if not streamsets_conn_id:
@@ -30,10 +39,18 @@ class TriggerStreamsetsOperator(BaseOperator):
             raise ValueError("pipeline_id is not set")
         self.pipeline_id = pipeline_id
 
+        self.polling_period = polling_period
+
     def execute(self, context: Context) -> Any:
         hook = StreamsetsHook(self.streamsets_conn_id)
-        result = hook.start_pipeline(self.pipeline_id)
-        return result
+        hook.start_pipeline(self.pipeline_id)
+
+        while True:
+            pipeline_is_finished = hook.polling_pipeline_run_status(self.pipeline_id)
+            if pipeline_is_finished:
+                break
+
+            time.sleep(self.polling_period.total_seconds())
 
     def on_kill(self) -> None:
         return super().on_kill()

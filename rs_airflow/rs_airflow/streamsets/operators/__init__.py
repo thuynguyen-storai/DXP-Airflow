@@ -1,1 +1,2 @@
 from .trigger_streamsets_operator import TriggerStreamsetsOperator
+from .trigger_streamsets_sensor import TriggerStreamsetsSensor

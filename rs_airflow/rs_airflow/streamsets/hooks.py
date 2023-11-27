@@ -1,4 +1,3 @@
-import time
 from typing import Any, Tuple
 
 import requests
@@ -78,13 +77,6 @@ class StreamsetsHook(BaseHook):
         self._verify_pipeline_initial_state(pipeline_id)
         self._trigger_start_pipeline(pipeline_id)
 
-        while True:
-            pipeline_is_finished = self._polling_pipeline_run_status(pipeline_id)
-            if pipeline_is_finished:
-                break
-
-            time.sleep(self.polling_seconds)
-
     def _verify_pipeline_initial_state(self, pipeline_id: str):
         pipeline_status = self._get_pipeline_status(pipeline_id)
 
@@ -98,7 +90,7 @@ class StreamsetsHook(BaseHook):
         )
         self._check_response(response)
 
-    def _polling_pipeline_run_status(self, pipeline_id: str) -> bool:
+    def polling_pipeline_run_status(self, pipeline_id: str) -> bool:
         """
         Polling StreamSets to check for pipeline run status
 
