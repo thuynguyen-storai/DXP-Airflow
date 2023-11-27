@@ -1,0 +1,142 @@
+images:
+  airflow:
+    repository: docker.io/ducthuyng/test-airflow-rs-image
+    tag: 0.2.8
+
+data:
+  metadataConnection:
+    user: sandbox_united_airflow
+    pass: "oHbzsn2EdaWQzAK"
+    protocol: postgresql
+    host: 192.168.20.198
+    port: 5432
+    db: "Sandbox_UnitedAirflow"
+
+# Stop database migration
+# Should only enable for first run, or when installing a new version of Airflow
+migrateDatabaseJob:
+  enabled: false
+
+executor: "KubernetesExecutor"
+fernetKey: "WFRPMzNqNXU3VXMwdFU3dFJjcHJKNVEyUVFMeWVmRE4="
+
+airflowHome: "/airflow"
+
+env:
+  - name: AIRFLOW_HOME
+    value: /airflow
+
+config:
+  core:
+    test_connection: Enabled
+
+  operators:
+    default_deferrable: "true"
+
+  database:
+    load_default_connections: "false"
+
+  logging:
+    remote_logging: "true"
+
+    remote_log_conn_id: azure_blob_conn
+    remote_base_log_folder: wasb-base-folder
+    delete_local_logs: "true"
+
+  smtp:
+    smtp_host: smtp.gmail.com
+    smtp_port: "587"
+
+  # Not effective
+  azure_remote_logging:
+    remote_wasb_log_container: airflow-logging
+
+postgresql:
+  enabled: false
+
+statsd:
+  enabled: false
+
+# Logging
+logs:
+  persistence:
+    enabled: false
+    # size: 1Gi
+    # existingClaim: sandboxunited-pvc
+
+webserver:
+  env:
+    - name: AIRFLOW__WEBSERVER__WORKERS
+      value: "1"
+
+  defaultUser:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 400m
+      memory: 750Mi
+      ephemeral-storage: 200Mi
+    limits:
+      memory: 750Mi
+      ephemeral-storage: 200Mi
+
+  startupProbe:
+    periodSeconds: 120
+  livenessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    timeoutSeconds: 30
+  readinessProbe:
+    initialDelaySeconds: 120
+
+  service:
+    type: NodePort
+    ports:
+      - name: airflow-ui
+        port: 80
+        targetPort: 8080
+        nodePort: 31000
+
+scheduler:
+  resources:
+    requests:
+      cpu: 400m
+      memory: 512Mi
+      ephemeral-storage: 200Mi
+    limits:
+      memory: 512Mi
+      ephemeral-storage: 200Mi
+
+  startupProbe:
+    periodSeconds: 120
+  livenessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 60
+    timeoutSeconds: 30
+    failureThreshold: 5
+
+workers:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
+
+triggerer:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
+
+  persistence:
+    enabled: false
+
+cleanup:
+  enabled: true
+  env:
+    - name: "AIRFLOW__CORE__EXECUTOR"
+      value: "KubernetesExecutor"
